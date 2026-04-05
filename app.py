@@ -4,33 +4,18 @@ from tensorflow.keras.preprocessing import image
 import numpy as np
 import os
 from werkzeug.utils import secure_filename
-import tensorflow as tf
 
 # Suppress TensorFlow warnings
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # Suppress INFO and WARNING messages
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import warnings
 warnings.filterwarnings('ignore')
 
 # Use double underscores for __name__
 app = Flask(__name__) 
 
-# Load model with compatibility fix for Keras version differences
-try:
-    # Try loading with compile=False to avoid optimizer issues
-    model = load_model('teeth_model.h5', compile=False)
-    # Recompile the model for inference
-    model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
-    print("✅ Model loaded successfully!")
-except Exception as e:
-    print(f"⚠️ Error loading model with standard method: {e}")
-    # Fallback: Try using TF's Keras directly
-    try:
-        model = tf.keras.models.load_model('teeth_model.h5', compile=False)
-        model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
-        print("✅ Model loaded successfully with fallback method!")
-    except Exception as e2:
-        print(f"❌ Critical error loading model: {e2}")
-        raise
+# Load model - TensorFlow 2.13.0 is compatible with batch_shape parameter
+model = load_model('teeth_model.h5')
+print("Model loaded successfully!")
 
 class_names = ['Calculus', 'Mouth Ulcer', 'Tooth Discoloration', 'Caries', 'Hypodontia']
 
