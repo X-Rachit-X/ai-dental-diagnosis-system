@@ -27,14 +27,6 @@
 
 </div>
 
-## 📸 Screenshots
-
-<div align="center">
-  <img src="https://via.placeholder.com/800x400/0f172a/10b981?text=SmileCare+Dental+AI+Interface" alt="Main Interface" width="80%"/>
-  <p><em>Modern, intuitive interface for dental disease detection</em></p>
-</div>
-
-> **Note:** Replace the placeholder image above with actual screenshots of your application once deployed.
 
 ## ✨ Features
 
