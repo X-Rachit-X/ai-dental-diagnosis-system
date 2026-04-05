@@ -14,7 +14,7 @@ warnings.filterwarnings('ignore')
 app = Flask(__name__) 
 
 # Load model - TensorFlow 2.13.0 is compatible with batch_shape parameter
-model = load_model('teeth_model.h5')
+model = load_model('teeth_model.h5',compile=False)
 print("Model loaded successfully!")
 
 class_names = ['Calculus', 'Mouth Ulcer', 'Tooth Discoloration', 'Caries', 'Hypodontia']
