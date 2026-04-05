@@ -39,12 +39,8 @@ ENV/
 
 # Uploads folder (temporary files)
 uploads/
-*.jpg
-*.jpeg
-*.png
-*.gif
-# But keep the folder structure
-!uploads/.gitkeep
+static/uploads/*
+!static/uploads/.gitkeep
 
 # OS
 .DS_Store

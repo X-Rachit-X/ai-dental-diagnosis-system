@@ -28,14 +28,15 @@ except Exception as e:
 
 class_names = ['Calculus', 'Mouth Ulcer', 'Tooth Discoloration', 'Caries', 'Hypodontia']
 
-# Define the path for uploads - separate from static assets
-UPLOAD_FOLDER = 'uploads'
+# Define the path for uploads - must be in static folder so Flask can serve it
+UPLOAD_FOLDER = 'static/uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 
 # Ensure the upload folder exists
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
+    logger.info(f"Created upload folder: {UPLOAD_FOLDER}")
 
 @app.route('/')
 def index():
@@ -49,6 +50,35 @@ def health():
         'model_loaded': model is not None,
         'classes': class_names
     }), 200
+
+@app.route('/cleanup', methods=['POST'])
+def cleanup_old_files():
+    """
+    Optional cleanup endpoint to remove old uploaded files
+    Call this periodically or manually to prevent disk overflow
+    """
+    try:
+        import time
+        max_age = 3600  # 1 hour in seconds
+        deleted_count = 0
+        
+        for filename in os.listdir(UPLOAD_FOLDER):
+            filepath = os.path.join(UPLOAD_FOLDER, filename)
+            if os.path.isfile(filepath):
+                # Check if file is older than max_age
+                file_age = time.time() - os.path.getmtime(filepath)
+                if file_age > max_age:
+                    os.remove(filepath)
+                    deleted_count += 1
+                    logger.info(f"Cleaned up old file: {filename}")
+        
+        return jsonify({
+            'status': 'success',
+            'deleted_files': deleted_count
+        }), 200
+    except Exception as e:
+        logger.error(f"Cleanup error: {e}")
+        return jsonify({'status': 'error', 'message': str(e)}), 500
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -100,19 +130,18 @@ def predict():
             
             logger.info(f"Prediction: {pred_class} ({confidence:.1f}%)")
 
-            # Pass the prediction back to the template
-            # Note: Image is deleted after prediction, so no image display needed
+            # Create web-accessible path for the image
+            # Path should be relative to static folder for Flask to serve it
+            img_path = f"uploads/{filename}"  # Flask will prepend 'static/' automatically
+            
+            # Pass the prediction and image path back to the template
             result = render_template('index.html', 
                                     prediction=pred_class, 
-                                    confidence=f"{confidence:.1f}")
+                                    confidence=f"{confidence:.1f}",
+                                    img_path=img_path)
             
-            # Clean up: Delete the uploaded file after prediction to prevent overflow
-            try:
-                if os.path.exists(filepath):
-                    os.remove(filepath)
-                    logger.info(f"File deleted: {filename}")
-            except Exception as e:
-                logger.error(f"Error deleting file: {e}")
+            # DO NOT delete the file here - frontend needs to display it
+            # Optional: Implement cleanup later (e.g., cron job to delete old files)
             
             return result
         
