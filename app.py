@@ -13,8 +13,8 @@ warnings.filterwarnings('ignore')
 # Use double underscores for __name__
 app = Flask(__name__) 
 
-# Load model - TensorFlow 2.13.0 is compatible with batch_shape parameter
-model = load_model('teeth_model.h5',compile=False)
+# Load model - Use .keras format for better compatibility
+model = load_model('teeth_model.keras', compile=False)
 print("Model loaded successfully!")
 
 class_names = ['Calculus', 'Mouth Ulcer', 'Tooth Discoloration', 'Caries', 'Hypodontia']
@@ -83,4 +83,5 @@ def predict():
 
 # Use double underscores for __name__ and '__main__'
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host='0.0.0.0', port=port)
