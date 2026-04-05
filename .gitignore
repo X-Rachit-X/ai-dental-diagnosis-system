@@ -57,9 +57,5 @@ Thumbs.db
 .pytest_cache/
 .coverage
 htmlcov/
-
-# Model cache (if you want to exclude)
-# Uncomment if model is too large for GitHub (>100MB)
-# teeth_model.h5
-# *.h5
-# *.keras
+DEPLOYMENT_GUIDE.md
+QUICK_START_GUIDE.md
