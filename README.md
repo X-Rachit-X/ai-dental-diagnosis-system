@@ -535,9 +535,8 @@ This tool is **NOT**:
 
 <div align="center">
 
-### Built With ❤️ For
+### Built With ❤️ by Rachit Agarwal
 
-**Semester 5 - Artificial Intelligence Course Project**
 
 </div>
 
