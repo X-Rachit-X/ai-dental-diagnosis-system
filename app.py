@@ -4,12 +4,34 @@ from tensorflow.keras.preprocessing import image
 import numpy as np
 import os
 from werkzeug.utils import secure_filename
+import tensorflow as tf
+
+# Suppress TensorFlow warnings
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # Suppress INFO and WARNING messages
+import warnings
+warnings.filterwarnings('ignore')
 
 # Use double underscores for __name__
 app = Flask(__name__) 
 
-model = load_model('teeth_model.h5')
-# model = load_model('oral_disease_model.keras')
+# Load model with compatibility fix for Keras version differences
+try:
+    # Try loading with compile=False to avoid optimizer issues
+    model = load_model('teeth_model.h5', compile=False)
+    # Recompile the model for inference
+    model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+    print("✅ Model loaded successfully!")
+except Exception as e:
+    print(f"⚠️ Error loading model with standard method: {e}")
+    # Fallback: Try using TF's Keras directly
+    try:
+        model = tf.keras.models.load_model('teeth_model.h5', compile=False)
+        model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+        print("✅ Model loaded successfully with fallback method!")
+    except Exception as e2:
+        print(f"❌ Critical error loading model: {e2}")
+        raise
+
 class_names = ['Calculus', 'Mouth Ulcer', 'Tooth Discoloration', 'Caries', 'Hypodontia']
 
 # Define the path for uploads - separate from static assets
@@ -54,8 +76,8 @@ def predict():
         # Add a batch dimension
         x = np.expand_dims(x, axis=0)
         
-        # Make the prediction
-        preds = model.predict(x)
+        # Make the prediction with verbose=0 to suppress output
+        preds = model.predict(x, verbose=0)
         
         # Get the class name
         pred_class = class_names[np.argmax(preds)]
